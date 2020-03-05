@@ -36,6 +36,9 @@ enum EndstopEnum : char {
   Z2_MIN, Z2_MAX,
   Z3_MIN, Z3_MAX,
   Z4_MIN, Z4_MAX
+  #if ENABLED(E0_HOME)
+    , E0_MIN
+  #endif
 };
 
 class Endstops {

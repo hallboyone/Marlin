@@ -75,7 +75,12 @@
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
 XYZ_CONSTS(float, base_max_pos,   MAX_POS);
 XYZ_CONSTS(float, base_home_pos,  HOME_POS);
-XYZ_CONSTS(float, max_length,     MAX_LENGTH);
+#if ENABLED(E0_HOME)
+  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, 360 }
+  XYZ_CONSTS(float, max_length,   MAX_LENGTH);
+#else
+  XYZ_CONSTS(float, max_length,   MAX_LENGTH);
+#endif
 XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
 XYZ_CONSTS(signed char, home_dir, HOME_DIR);
 
@@ -149,14 +154,21 @@ feedRate_t feedrate_mm_s = MMM_TO_MMS(1500);
 int16_t feedrate_percentage = 100;
 
 // Homing feedrate is const progmem - compare to constexpr in the header
-const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
-  #if ENABLED(DELTA)
-    MMM_TO_MMS(HOMING_FEEDRATE_Z), MMM_TO_MMS(HOMING_FEEDRATE_Z),
-  #else
+#if ENABLED(E0_HOME)
+  const feedRate_t homing_feedrate_mm_s[XYZE] PROGMEM = {
     MMM_TO_MMS(HOMING_FEEDRATE_XY), MMM_TO_MMS(HOMING_FEEDRATE_XY),
-  #endif
-  MMM_TO_MMS(HOMING_FEEDRATE_Z)
-};
+    MMM_TO_MMS(HOMING_FEEDRATE_Z), HOMING_FEEDRATE_E0
+  };
+#else
+  const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
+    #if ENABLED(DELTA)
+      MMM_TO_MMS(HOMING_FEEDRATE_Z), MMM_TO_MMS(HOMING_FEEDRATE_Z),
+    #else
+      MMM_TO_MMS(HOMING_FEEDRATE_XY), MMM_TO_MMS(HOMING_FEEDRATE_XY),
+    #endif
+    MMM_TO_MMS(HOMING_FEEDRATE_Z)
+  };
+#endif
 
 // Cartesian conversion result goes here:
 xyz_pos_t cartes;
@@ -1304,6 +1316,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     sensorless_t stealth_states;
   #endif
 
+  //If we are moving to an endstop
   if (is_home_dir) {
 
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
@@ -1350,6 +1363,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
       if (axis == Z_AXIS) probe.set_probing_paused(false);
     #endif
 
+    //Makes sure that at one of the endstops was triggered
     endstops.validate_homing_move();
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
@@ -1382,6 +1396,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
 void set_axis_is_at_home(const AxisEnum axis) {
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_at_home(", axis_codes[axis], ")");
 
+  //Sets the flags for the current axis to be true
   SBI(axis_known_position, axis);
   SBI(axis_homed, axis);
 
@@ -1474,6 +1489,7 @@ void set_axis_is_not_at_home(const AxisEnum axis) {
 
 void homeaxis(const AxisEnum axis) {
 
+  //Make sure there is at least one homeable axis
   #if IS_SCARA
     // Only Z homing (with probe) is permitted
     if (axis != Z_AXIS) { BUZZ(100, 880); return; }
@@ -1495,7 +1511,12 @@ void homeaxis(const AxisEnum axis) {
     #else
       #define CAN_HOME_Z _CAN_HOME(Z)
     #endif
-    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z) return;
+    #if ENABLED(E0_HOME)
+      #define CAN_HOME_E0 _CAN_HOME(E0)
+    #else
+      #define CAN_HOME_E0 false
+    #endif
+    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E0) return;
   #endif
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");

@@ -595,6 +595,22 @@
 // Enable this if X or Y can't home without homing the other axis first.
 //#define CODEPENDENT_XY_HOMING
 
+//===========================================================================
+//============================ E Homeing Options ============================
+//===========================================================================
+#define E0_HOME
+
+#if ENABLED(E0_HOME)
+  //#define E0_NO_MOTION_BEFORE_HOMING 1
+
+  #define E0_HOME_PIN
+  #define E0_HOME_DIR -1
+  #define HOMEING_FEEDRATE_E0 25 //Deg/s
+  #define E0_HOME_BUMP_DEG 10
+  #define E0_HOMEING_BUMP_DIVISOR 2
+#endif
+//===========================================================================
+
 #if ENABLED(BLTOUCH)
   /**
    * Either: Use the defaults (recommended) or: For special purposes, use the following DEFINES
