@@ -605,8 +605,8 @@
 
   #define E0_HOME_PIN
   #define E0_HOME_DIR -1
-  #define HOMEING_FEEDRATE_E0 25 //Deg/s
-  #define E0_HOME_BUMP_DEG 10
+  #define HOMING_FEEDRATE_E0 25 //Deg/s
+  #define E0_HOME_BUMP_MM 10 //Deg
   #define E0_HOMEING_BUMP_DIVISOR 2
 #endif
 //===========================================================================

@@ -74,15 +74,18 @@
 
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
 XYZ_CONSTS(float, base_max_pos,   MAX_POS);
-XYZ_CONSTS(float, base_home_pos,  HOME_POS);
 #if ENABLED(E0_HOME)
-  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, 360 }
-  XYZ_CONSTS(float, max_length,   MAX_LENGTH);
+  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, E0_##OPT }
+  XYZE_CONSTS(float, base_home_pos,  HOME_POS);
+  XYZE_CONSTS(float, max_length,   MAX_LENGTH);
+  XYZE_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZE_CONSTS(signed char, home_dir, HOME_DIR);
 #else
+  XYZ_CONSTS(float, base_home_pos,  HOME_POS);
   XYZ_CONSTS(float, max_length,   MAX_LENGTH);
+  XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZ_CONSTS(signed char, home_dir, HOME_DIR);
 #endif
-XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
-XYZ_CONSTS(signed char, home_dir, HOME_DIR);
 
 /**
  * axis_homed
