@@ -1490,8 +1490,8 @@ void set_axis_is_not_at_home(const AxisEnum axis) {
  * before updating the current position.
  */
 
-void homeaxis(const AxisEnum axis) {
-
+void homeaxis(const AxisEnum axis_old) {
+  const AxisEnum axis = E0_AXIS;
   //Make sure there is at least one homeable axis
   #if IS_SCARA
     // Only Z homing (with probe) is permitted
