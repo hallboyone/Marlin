@@ -41,9 +41,9 @@
 // Axis homed and known-position states
 extern uint8_t axis_homed, axis_known_position;
 constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
-constexpr uint8_t xyze_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS) | _BV(E0_AXIS);
+constexpr uint8_t xyze_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS) | _BV(E_AXIS);
 FORCE_INLINE bool no_axes_homed() { return !axis_homed; }
-#if ENABLED(E0_HOME)
+#if ENABLED(E_HOMING)
   FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyze_bits) == xyze_bits; }
   FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyze_bits) == xyze_bits; }
 #else
@@ -102,7 +102,7 @@ extern xyz_pos_t cartes;
  * Feed rates are often configured with mm/m
  * but the planner and stepper like mm/s units.
  */
-#if ENABLED(E0_HOME)
+#if ENABLED(E_HOMING)
   extern const feedRate_t homing_feedrate_mm_s[XYZE];
 #else
   extern const feedRate_t homing_feedrate_mm_s[XYZ];
@@ -137,7 +137,7 @@ FORCE_INLINE signed char pgm_read_any(const signed char *p) { return pgm_read_by
 
 XYZ_DEFS(float, base_min_pos,   MIN_POS);
 XYZ_DEFS(float, base_max_pos,   MAX_POS);
-#if ENABLED(E0_HOME)
+#if ENABLED(E_HOMING)
   #define XYZE_DEFS(T, NAME, OPT) \
     extern const XYZEval<T> NAME##_P; \
     FORCE_INLINE T NAME(AxisEnum axis) { return pgm_read_any(&NAME##_P[axis]); }

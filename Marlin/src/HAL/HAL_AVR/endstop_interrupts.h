@@ -168,7 +168,7 @@ void setup_endstop_interrupts() {
       pciSetup(Z_MIN_PIN);
     #endif
   #endif
-  #if ENABLED(E0_HOME)
+  #if ENABLED(E_HOMING)
     #if HAS_E0_MAX
       #if (digitalPinToInterrupt(E0_MAX_PIN) != NOT_AN_INTERRUPT)
         _ATTACH(E0_MAX_PIN);

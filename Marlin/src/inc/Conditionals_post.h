@@ -178,9 +178,9 @@
   #define Z_HOME_POS (Z_HOME_DIR < 0 ? Z_MIN_POS : Z_MAX_POS)
 #endif
 
-#if ENABLED(E0_HOME)
-  #define E0_HOME_POS 0
-  #define E0_MAX_LENGTH 360
+#if ENABLED(E_HOMING)
+  #define E_HOME_POS 0
+  #define E_MAX_LENGTH 360
 #endif
 
 /**

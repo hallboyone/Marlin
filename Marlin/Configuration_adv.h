@@ -598,16 +598,16 @@
 //===========================================================================
 //============================ E Homeing Options ============================
 //===========================================================================
-#define E0_HOME
+#define E_HOMING
 
-#if ENABLED(E0_HOME)
+#if ENABLED(E_HOMING)
   //#define E0_NO_MOTION_BEFORE_HOMING 1
 
-  #define E0_HOME_PIN
-  #define E0_HOME_DIR -1
-  #define HOMING_FEEDRATE_E0 25 //Deg/s
-  #define E0_HOME_BUMP_MM 10 //Deg
-  #define E0_HOMEING_BUMP_DIVISOR 2
+  #define E_HOME_PIN
+  #define E_HOME_DIR -1
+  #define HOMING_FEEDRATE_E 25 //Deg/s
+  #define E_HOME_BUMP_MM 10 //Deg
+  #define E_HOMEING_BUMP_DIVISOR 2
 #endif
 //===========================================================================
 

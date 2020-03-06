@@ -74,8 +74,8 @@
 
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
 XYZ_CONSTS(float, base_max_pos,   MAX_POS);
-#if ENABLED(E0_HOME)
-  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, E0_##OPT }
+#if ENABLED(E_HOMING)
+  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, E_##OPT }
   XYZE_CONSTS(float, base_home_pos,  HOME_POS);
   XYZE_CONSTS(float, max_length,   MAX_LENGTH);
   XYZE_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
@@ -157,10 +157,10 @@ feedRate_t feedrate_mm_s = MMM_TO_MMS(1500);
 int16_t feedrate_percentage = 100;
 
 // Homing feedrate is const progmem - compare to constexpr in the header
-#if ENABLED(E0_HOME)
+#if ENABLED(E_HOMING)
   const feedRate_t homing_feedrate_mm_s[XYZE] PROGMEM = {
     MMM_TO_MMS(HOMING_FEEDRATE_XY), MMM_TO_MMS(HOMING_FEEDRATE_XY),
-    MMM_TO_MMS(HOMING_FEEDRATE_Z), HOMING_FEEDRATE_E0
+    MMM_TO_MMS(HOMING_FEEDRATE_Z), HOMING_FEEDRATE_E
   };
 #else
   const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
@@ -1513,14 +1513,15 @@ void homeaxis(const AxisEnum axis) {
     #else
       #define CAN_HOME_Z _CAN_HOME(Z)
     #endif
-    #if ENABLED(E0_HOME)
-      #define CAN_HOME_E0 _CAN_HOME(E0)
+    #if ENABLED(E_HOMING)
+      #define CAN_HOME_E _CAN_HOME(E)
     #else
-      #define CAN_HOME_E0 false
+      #define CAN_HOME_E false
     #endif
-    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E0) return;
+    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E) return;
   #endif
 
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> Active axis ", axis, ")");
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");
 
   const int axis_home_dir = (
