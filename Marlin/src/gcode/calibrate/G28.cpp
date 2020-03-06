@@ -320,9 +320,17 @@ void GcodeSuite::G28(const bool always_home_all) {
   #else // NOT DELTA
 
     const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
-               homeE = #if ENABLED(E0_HOME) parser.seen('E') #else 0 #endif,
-               home_all = always_home_all || (homeX == homeY && homeX == homeZ
-                 #if ENABLED(E0_HOME) && homeX == homeE #endif);
+               homeE =
+                #if ENABLED(E0_HOME)
+                    parser.seen('E');
+                #else
+                    0;
+                #endif
+    const bool home_all = always_home_all || (homeX == homeY && homeX == homeZ
+                #if ENABLED(E0_HOME)
+                    && homeX == homeE
+                #endif
+                );
 
     const bool  doX = home_all || homeX,
                 doY = home_all || homeY,
@@ -412,7 +420,7 @@ void GcodeSuite::G28(const bool always_home_all) {
     #endif
 
     #if ENABLED(E0_HOME)
-      if (doE) homeaxis(E0_AXIS)
+      if (doE) homeaxis(E0_AXIS);
     #endif
 
     #if ENABLED(IMPROVE_HOMING_RELIABILITY)

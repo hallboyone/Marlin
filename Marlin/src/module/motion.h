@@ -41,6 +41,7 @@
 // Axis homed and known-position states
 extern uint8_t axis_homed, axis_known_position;
 constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
+constexpr uint8_t xyze_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS) | _BV(E0_AXIS);
 FORCE_INLINE bool no_axes_homed() { return !axis_homed; }
 #if ENABLED(E0_HOME)
   FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyze_bits) == xyze_bits; }
