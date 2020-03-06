@@ -1153,6 +1153,11 @@
   #define Z_MAX_PIN          -1
 #endif
 
+#if DISABLED(USE_EMAX_PLUG)
+  #undef E_MAX_PIN
+  #define E_MAX_PIN          -1
+#endif
+
 #if DISABLED(USE_XMIN_PLUG)
   #undef X_MIN_PIN
   #define X_MIN_PIN          -1
@@ -1166,6 +1171,11 @@
 #if DISABLED(USE_ZMIN_PLUG)
   #undef Z_MIN_PIN
   #define Z_MIN_PIN          -1
+#endif
+
+#if DISABLED(USE_EMIN_PLUG)
+  #undef E_MIN_PIN
+  #define E_MIN_PIN          -1
 #endif
 
 #if HAS_FILAMENT_SENSOR

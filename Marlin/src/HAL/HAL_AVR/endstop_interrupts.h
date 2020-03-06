@@ -169,20 +169,20 @@ void setup_endstop_interrupts() {
     #endif
   #endif
   #if ENABLED(E_HOMING)
-    #if HAS_E0_MAX
-      #if (digitalPinToInterrupt(E0_MAX_PIN) != NOT_AN_INTERRUPT)
-        _ATTACH(E0_MAX_PIN);
+    #if HAS_E_MAX
+      #if (digitalPinToInterrupt(E_MAX_PIN) != NOT_AN_INTERRUPT)
+        _ATTACH(E_MAX_PIN);
       #else
-        static_assert(digitalPinHasPCICR(E0_MIN_PIN), "E0_MIN_PIN is not interrupt-capable");
-        pciSetup(E0_MIN_PIN);
+        static_assert(digitalPinHasPCICR(E_MAX_PIN), "E_MAX_PIN is not interrupt-capable");
+        pciSetup(E_MAX_PIN);
       #endif
     #endif
-    #if HAS_E0_MIN
-      #if (digitalPinToInterrupt(E0_MIN_PIN) != NOT_AN_INTERRUPT)
-        _ATTACH(E0_MIN_PIN);
+    #if HAS_E_MIN
+      #if (digitalPinToInterrupt(E_MIN_PIN) != NOT_AN_INTERRUPT)
+        _ATTACH(E_MIN_PIN);
       #else
-        static_assert(digitalPinHasPCICR(E0_MIN_PIN), "E0_MIN_PIN is not interrupt-capable");
-        pciSetup(E0_MIN_PIN);
+        static_assert(digitalPinHasPCICR(E_MIN_PIN), "E_MIN_PIN is not interrupt-capable");
+        pciSetup(E_MIN_PIN);
       #endif
     #endif
   #endif

@@ -35,9 +35,10 @@ enum EndstopEnum : char {
   Y2_MIN, Y2_MAX,
   Z2_MIN, Z2_MAX,
   Z3_MIN, Z3_MAX,
-  Z4_MIN, Z4_MAX
   #if ENABLED(E_HOMING)
-    , E0_MIN
+    E_MIN , E_MAX
+  #else
+    Z4_MIN, Z4_MAX
   #endif
 };
 
@@ -67,7 +68,7 @@ class Endstops {
   private:
     static bool enabled, enabled_globally;
     static esbits_t live_state;
-    static volatile uint8_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
+    static volatile esbits_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
 
     #if ENDSTOP_NOISE_THRESHOLD
       static esbits_t validated_live_state;
@@ -110,7 +111,7 @@ class Endstops {
     /**
      * Get Endstop hit state.
      */
-    FORCE_INLINE static uint8_t trigger_state() { return hit_state; }
+    FORCE_INLINE static esbits_t trigger_state() { return hit_state; }
 
     /**
      * Get current endstops state

@@ -1124,6 +1124,7 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
   #if HOMING_Z_WITH_PROBE
     if (axis == Z_AXIS) return MMM_TO_MMS(Z_PROBE_SPEED_SLOW);
   #endif
+  
   static const uint8_t homing_bump_divisor[] PROGMEM = HOMING_BUMP_DIVISOR;
   uint8_t hbd = pgm_read_byte(&homing_bump_divisor[axis]);
   if (hbd < 1) {
@@ -1321,7 +1322,6 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
 
   //If we are moving to an endstop
   if (is_home_dir) {
-
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
       if (axis == Z_AXIS) probe.set_probing_paused(true);
     #endif
@@ -1358,7 +1358,9 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     );
   #endif
 
+  DEBUG_ECHOLNPGM("Waiting to hit endstop");
   planner.synchronize();
+  DEBUG_ECHOLNPGM("Hit endstop");
 
   if (is_home_dir) {
 
@@ -1521,7 +1523,7 @@ void homeaxis(const AxisEnum axis) {
     if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E) return;
   #endif
 
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> Active axis ", axis, ")");
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> Active axis ", axis, "");
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");
 
   const int axis_home_dir = (
@@ -1554,7 +1556,7 @@ void homeaxis(const AxisEnum axis) {
   #endif
 
   // Fast move towards endstop until triggered
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 1 Fast:");
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Fast move...");
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     if (axis == Z_AXIS && bltouch.deploy()) return; // The initial DEPLOY
@@ -1568,6 +1570,8 @@ void homeaxis(const AxisEnum axis) {
     #endif
     ) * axis_home_dir
   );
+
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Slow move...");
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
@@ -1592,7 +1596,7 @@ void homeaxis(const AxisEnum axis) {
     );
 
     // Slow move towards endstop until triggered
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 2 Slow:");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homeing: Slow move...");
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
       if (axis == Z_AXIS && bltouch.deploy()) return; // Intermediate DEPLOY (in LOW SPEED MODE)

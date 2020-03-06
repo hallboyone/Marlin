@@ -585,7 +585,7 @@
 #define X_HOME_BUMP_MM 5
 #define Y_HOME_BUMP_MM 5
 #define Z_HOME_BUMP_MM 2
-#define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+#define HOMING_BUMP_DIVISOR { 2, 2, 4, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 //#define HOMING_BACKOFF_MM { 2, 2, 2 }  // (mm) Move away from the endstops after homing
 
@@ -605,9 +605,12 @@
 
   #define E_HOME_PIN
   #define E_HOME_DIR -1
-  #define HOMING_FEEDRATE_E 25 //Deg/s
-  #define E_HOME_BUMP_MM 10 //Deg
-  #define E_HOMEING_BUMP_DIVISOR 2
+  #define HOMING_FEEDRATE_E 90 //Deg/s
+  #define E_HOME_BUMP_MM 20 //Deg
+  #define USE_EMIN_PLUG
+  //#define USE_EMAX_PLUG
+  #define E_MAX_ENDSTOP_INVERTING false
+  #define E_MIN_ENDSTOP_INVERTING false
 #endif
 //===========================================================================
 

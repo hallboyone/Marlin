@@ -53,7 +53,7 @@ Endstops endstops;
 // private:
 
 bool Endstops::enabled, Endstops::enabled_globally; // Initialized by settings.load()
-volatile uint8_t Endstops::hit_state;
+volatile Endstops::esbits_t Endstops::hit_state;
 
 Endstops::esbits_t Endstops::live_state = 0;
 
@@ -176,6 +176,16 @@ void Endstops::init() {
     #endif
   #endif
 
+  #if HAS_E_MIN
+    #if ENABLED(ENDSTOPPULLUP_EMIN)
+      SET_INPUT_PULLUP(E_MIN_PIN);
+    #elif ENABLED(ENDSTOPPULLDOWN_EMIN)
+      SET_INPUT_PULLDOWN(E_MIN_PIN);
+      #else
+      SET_INPUT(E_MIN_PIN);
+    #endif
+#endif
+
   #if HAS_X_MAX
     #if ENABLED(ENDSTOPPULLUP_XMAX)
       SET_INPUT_PULLUP(X_MAX_PIN);
@@ -255,6 +265,16 @@ void Endstops::init() {
       SET_INPUT(Z4_MAX_PIN);
     #endif
   #endif
+
+  #if HAS_E_MAX
+  #if ENABLED(ENDSTOPPULLUP_EMAX)
+    SET_INPUT_PULLUP(E_MAX_PIN);
+  #elif ENABLED(ENDSTOPPULLDOWN_EMAX)
+    SET_INPUT_PULLDOWN(E_MAX_PIN);
+  #else
+    SET_INPUT(E_MAX_PIN);
+  #endif
+#endif
 
   #if PIN_EXISTS(CALIBRATION)
     #if ENABLED(CALIBRATION_PIN_PULLUP)
@@ -473,6 +493,12 @@ void _O2 Endstops::report_states() {
   #if HAS_Z4_MAX
     ES_REPORT(Z4_MAX);
   #endif
+  #if HAS_E_MIN
+    ES_REPORT(E_MIN);
+  #endif
+  #if HAS_E_MAX
+    ES_REPORT(E_MAX);
+  #endif
   #if HAS_CUSTOM_PROBE_PIN
     print_es_state(READ(Z_MIN_PROBE_PIN) != Z_MIN_PROBE_ENDSTOP_INVERTING, PSTR(STR_Z_PROBE));
   #endif
@@ -659,6 +685,14 @@ void Endstops::update() {
     #endif
   #endif
 
+  #if HAS_E_MIN
+    UPDATE_ENDSTOP_BIT(E, MIN);
+  #endif
+
+  #if HAS_E_MAX
+    UPDATE_ENDSTOP_BIT(E, MAX);
+  #endif
+
   #if ENDSTOP_NOISE_THRESHOLD
 
     /**
@@ -820,6 +854,21 @@ void Endstops::update() {
       #endif
     }
   }
+
+  #if ENABLED(E_HOMING)
+    if (stepper.axis_is_moving(E_AXIS)) {
+      if (stepper.motor_direction(E_AXIS)) { // -direction
+        #if HAS_E_MIN
+          PROCESS_ENDSTOP(E, MIN);
+        #endif
+      }
+      else { // +direction
+        #if HAS_E_MAX
+          PROCESS_ENDSTOP(E, MAX);
+        #endif
+      }
+    }
+  #endif
 } // Endstops::update()
 
 #if ENABLED(SPI_ENDSTOPS)
