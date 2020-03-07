@@ -1850,10 +1850,18 @@ uint32_t Stepper::block_phase_isr() {
         #define Z_MOVE_TEST !!current_block->steps.c
       #endif
 
+      #if ENABLED(E_HOMING)
+        #define E_MOVE_TEST !!current_block->steps.e
+      #endif
+
       uint8_t axis_bits = 0;
       if (X_MOVE_TEST) SBI(axis_bits, A_AXIS);
       if (Y_MOVE_TEST) SBI(axis_bits, B_AXIS);
       if (Z_MOVE_TEST) SBI(axis_bits, C_AXIS);
+      #if ENABLED(E_HOMING)
+        #define E_MOVE_TEST !!current_block->steps.e
+        if (E_MOVE_TEST) SBI(axis_bits, E_AXIS);
+      #endif
       //if (!!current_block->steps.e) SBI(axis_bits, E_AXIS);
       //if (!!current_block->steps.a) SBI(axis_bits, X_HEAD);
       //if (!!current_block->steps.b) SBI(axis_bits, Y_HEAD);

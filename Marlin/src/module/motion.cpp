@@ -74,10 +74,18 @@
 
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
 XYZ_CONSTS(float, base_max_pos,   MAX_POS);
-XYZ_CONSTS(float, base_home_pos,  HOME_POS);
-XYZ_CONSTS(float, max_length,     MAX_LENGTH);
-XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
-XYZ_CONSTS(signed char, home_dir, HOME_DIR);
+#if ENABLED(E_HOMING)
+  #define XYZE_CONSTS(T, NAME, OPT) const PROGMEM XYZEval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT, E_##OPT }
+  XYZE_CONSTS(float, base_home_pos,  HOME_POS);
+  XYZE_CONSTS(float, max_length,   MAX_LENGTH);
+  XYZE_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZE_CONSTS(signed char, home_dir, HOME_DIR);
+#else
+  XYZ_CONSTS(float, base_home_pos,  HOME_POS);
+  XYZ_CONSTS(float, max_length,   MAX_LENGTH);
+  XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZ_CONSTS(signed char, home_dir, HOME_DIR);
+#endif
 
 /**
  * axis_homed
@@ -149,14 +157,21 @@ feedRate_t feedrate_mm_s = MMM_TO_MMS(1500);
 int16_t feedrate_percentage = 100;
 
 // Homing feedrate is const progmem - compare to constexpr in the header
-const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
-  #if ENABLED(DELTA)
-    MMM_TO_MMS(HOMING_FEEDRATE_Z), MMM_TO_MMS(HOMING_FEEDRATE_Z),
-  #else
+#if ENABLED(E_HOMING)
+  const feedRate_t homing_feedrate_mm_s[XYZE] PROGMEM = {
     MMM_TO_MMS(HOMING_FEEDRATE_XY), MMM_TO_MMS(HOMING_FEEDRATE_XY),
-  #endif
-  MMM_TO_MMS(HOMING_FEEDRATE_Z)
-};
+    MMM_TO_MMS(HOMING_FEEDRATE_Z), HOMING_FEEDRATE_E
+  };
+#else
+  const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
+    #if ENABLED(DELTA)
+      MMM_TO_MMS(HOMING_FEEDRATE_Z), MMM_TO_MMS(HOMING_FEEDRATE_Z),
+    #else
+      MMM_TO_MMS(HOMING_FEEDRATE_XY), MMM_TO_MMS(HOMING_FEEDRATE_XY),
+    #endif
+    MMM_TO_MMS(HOMING_FEEDRATE_Z)
+  };
+#endif
 
 // Cartesian conversion result goes here:
 xyz_pos_t cartes;
@@ -1141,6 +1156,7 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
   #if HOMING_Z_WITH_PROBE
     if (axis == Z_AXIS) return MMM_TO_MMS(Z_PROBE_SPEED_SLOW);
   #endif
+  
   static const uint8_t homing_bump_divisor[] PROGMEM = HOMING_BUMP_DIVISOR;
   uint8_t hbd = pgm_read_byte(&homing_bump_divisor[axis]);
   if (hbd < 1) {
@@ -1328,8 +1344,8 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     sensorless_t stealth_states;
   #endif
 
+  //If we are moving to an endstop
   if (is_home_dir) {
-
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
       if (axis == Z_AXIS) probe.set_probing_paused(true);
     #endif
@@ -1366,7 +1382,9 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     );
   #endif
 
+  DEBUG_ECHOLNPGM("Waiting to hit endstop");
   planner.synchronize();
+  DEBUG_ECHOLNPGM("Hit endstop");
 
   if (is_home_dir) {
 
@@ -1374,6 +1392,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
       if (axis == Z_AXIS) probe.set_probing_paused(false);
     #endif
 
+    //Makes sure that at one of the endstops was triggered
     endstops.validate_homing_move();
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
@@ -1406,6 +1425,7 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
 void set_axis_is_at_home(const AxisEnum axis) {
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_at_home(", axis_codes[axis], ")");
 
+  //Sets the flags for the current axis to be true
   SBI(axis_known_position, axis);
   SBI(axis_homed, axis);
 
@@ -1497,7 +1517,7 @@ void set_axis_is_not_at_home(const AxisEnum axis) {
  */
 
 void homeaxis(const AxisEnum axis) {
-
+  //Make sure there is at least one homeable axis
   #if IS_SCARA
     // Only Z homing (with probe) is permitted
     if (axis != Z_AXIS) { BUZZ(100, 880); return; }
@@ -1519,9 +1539,15 @@ void homeaxis(const AxisEnum axis) {
     #else
       #define CAN_HOME_Z _CAN_HOME(Z)
     #endif
-    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z) return;
+    #if ENABLED(E_HOMING)
+      #define CAN_HOME_E _CAN_HOME(E)
+    #else
+      #define CAN_HOME_E false
+    #endif
+    if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E) return;
   #endif
 
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> Active axis ", axis, "");
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");
 
   const int axis_home_dir = (
@@ -1554,7 +1580,7 @@ void homeaxis(const AxisEnum axis) {
   #endif
 
   // Fast move towards endstop until triggered
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 1 Fast:");
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Fast move...");
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     if (axis == Z_AXIS && bltouch.deploy()) return; // The initial DEPLOY
@@ -1568,6 +1594,8 @@ void homeaxis(const AxisEnum axis) {
     #endif
     ) * axis_home_dir
   );
+
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Slow move...");
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
@@ -1592,7 +1620,7 @@ void homeaxis(const AxisEnum axis) {
     );
 
     // Slow move towards endstop until triggered
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 2 Slow:");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homeing: Slow move...");
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
       if (axis == Z_AXIS && bltouch.deploy()) return; // Intermediate DEPLOY (in LOW SPEED MODE)

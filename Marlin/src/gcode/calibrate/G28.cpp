@@ -319,10 +319,33 @@ void GcodeSuite::G28() {
   #else // NOT DELTA
 
     const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
-               home_all = homeX == homeY && homeX == homeZ, // All or None
-               doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ;
+                #if ENABLED(E_HOMING)
+                    homeE = parser.seen('E');
+                #else
+                    homeE = 0;
+                #endif
+    const bool home_all = always_home_all || (homeX == homeY && homeX == homeZ
+                #if ENABLED(E_HOMING)
+                    && homeX == homeE
+                #endif
+                );
+
+    const bool  doX = home_all || homeX,
+                doY = home_all || homeY,
+                doZ = home_all || homeZ,
+                #if ENABLED(E_HOMING)
+                  doE = home_all || homeE;
+                #else
+                  doE = 0;
+                #endif
 
     destination = current_position;
+
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("DoX = ",doX,"...");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("DoY = ",doY,"...");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("DoZ = ",doZ,"...");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("DoE = ",doE,"...");
+
 
     #if Z_HOME_DIR > 0  // If homing away from BED do Z first
 
@@ -398,6 +421,10 @@ void GcodeSuite::G28() {
     // Home Y (after X)
     #if DISABLED(HOME_Y_BEFORE_X)
       if (doY) homeaxis(Y_AXIS);
+    #endif
+
+    #if ENABLED(E_HOMING)
+      if (doE) homeaxis(E_AXIS);
     #endif
 
     #if ENABLED(IMPROVE_HOMING_RELIABILITY)

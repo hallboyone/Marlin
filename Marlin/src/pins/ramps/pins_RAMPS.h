@@ -108,6 +108,14 @@
     #define Z_MAX_PIN      19
   #endif
 #endif
+#ifndef E_STOP_PIN
+  #ifndef E_MIN_PIN
+    #define E_MIN_PIN      19
+  #endif
+  #ifndef E_MAX_PIN
+    #define E_MAX_PIN      19
+  #endif
+#endif
 
 //
 // Z Probe (when not Z_MIN_PIN)

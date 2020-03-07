@@ -37,9 +37,15 @@
 // Axis homed and known-position states
 extern uint8_t axis_homed, axis_known_position;
 constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
+constexpr uint8_t xyze_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS) | _BV(E_AXIS);
 FORCE_INLINE bool no_axes_homed() { return !axis_homed; }
-FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
-FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
+#if ENABLED(E_HOMING)
+  FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyze_bits) == xyze_bits; }
+  FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyze_bits) == xyze_bits; }
+#else
+  FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
+  FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
+#endif
 FORCE_INLINE void set_all_unhomed() { axis_homed = 0; }
 FORCE_INLINE void set_all_unknown() { axis_known_position = 0; }
 
@@ -92,7 +98,11 @@ extern xyz_pos_t cartes;
  * Feed rates are often configured with mm/m
  * but the planner and stepper like mm/s units.
  */
-extern const feedRate_t homing_feedrate_mm_s[XYZ];
+#if ENABLED(E_HOMING)
+  extern const feedRate_t homing_feedrate_mm_s[XYZE];
+#else
+  extern const feedRate_t homing_feedrate_mm_s[XYZ];
+#endif
 FORCE_INLINE feedRate_t homing_feedrate(const AxisEnum a) { return pgm_read_float(&homing_feedrate_mm_s[a]); }
 feedRate_t get_homing_bump_feedrate(const AxisEnum axis);
 
@@ -123,10 +133,20 @@ FORCE_INLINE signed char pgm_read_any(const signed char *p) { return pgm_read_by
 
 XYZ_DEFS(float, base_min_pos,   MIN_POS);
 XYZ_DEFS(float, base_max_pos,   MAX_POS);
-XYZ_DEFS(float, base_home_pos,  HOME_POS);
-XYZ_DEFS(float, max_length,     MAX_LENGTH);
-XYZ_DEFS(float, home_bump_mm,   HOME_BUMP_MM);
-XYZ_DEFS(signed char, home_dir, HOME_DIR);
+#if ENABLED(E_HOMING)
+  #define XYZE_DEFS(T, NAME, OPT) \
+    extern const XYZEval<T> NAME##_P; \
+    FORCE_INLINE T NAME(AxisEnum axis) { return pgm_read_any(&NAME##_P[axis]); }
+  XYZE_DEFS(float, base_home_pos,  HOME_POS);
+  XYZE_DEFS(float, max_length,     MAX_LENGTH);
+  XYZE_DEFS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZE_DEFS(signed char, home_dir, HOME_DIR);
+#else
+  XYZ_DEFS(float, base_home_pos,  HOME_POS);
+  XYZ_DEFS(float, max_length,     MAX_LENGTH);
+  XYZ_DEFS(float, home_bump_mm,   HOME_BUMP_MM);
+  XYZ_DEFS(signed char, home_dir, HOME_DIR);
+#endif
 
 #if HAS_WORKSPACE_OFFSET
   void update_workspace_offset(const AxisEnum axis);
