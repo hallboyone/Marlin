@@ -210,7 +210,7 @@
  *  Z   Home to the Z endstop
  *
  */
-void GcodeSuite::G28(const bool always_home_all) {
+void GcodeSuite::G28() {
   if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOLNPGM(">>> G28");
     log_machine_info();
@@ -311,7 +311,6 @@ void GcodeSuite::G28(const bool always_home_all) {
   #if ENABLED(DELTA)
 
     home_delta();
-    UNUSED(always_home_all);
 
     #if ENABLED(IMPROVE_HOMING_RELIABILITY)
       end_slow_homing(slow_homing);
