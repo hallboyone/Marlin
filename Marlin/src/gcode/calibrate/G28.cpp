@@ -317,14 +317,13 @@ void GcodeSuite::G28() {
     #endif
 
   #else // NOT DELTA
-
     const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
                 #if ENABLED(E_HOMING)
                     homeE = parser.seen('E');
                 #else
                     homeE = 0;
                 #endif
-    const bool home_all = always_home_all || (homeX == homeY && homeX == homeZ
+    const bool home_all = (homeX == homeY && homeX == homeZ
                 #if ENABLED(E_HOMING)
                     && homeX == homeE
                 #endif

@@ -603,8 +603,6 @@
 #define E_HOMING
 
 #if ENABLED(E_HOMING)
-  //#define E0_NO_MOTION_BEFORE_HOMING 1
-
   #define E_HOME_PIN
   #define E_HOME_DIR -1
   #define HOMING_FEEDRATE_E 90 //Deg/s

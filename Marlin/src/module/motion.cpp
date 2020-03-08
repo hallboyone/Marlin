@@ -1156,7 +1156,7 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
   #if HOMING_Z_WITH_PROBE
     if (axis == Z_AXIS) return MMM_TO_MMS(Z_PROBE_SPEED_SLOW);
   #endif
-  
+
   static const uint8_t homing_bump_divisor[] PROGMEM = HOMING_BUMP_DIVISOR;
   uint8_t hbd = pgm_read_byte(&homing_bump_divisor[axis]);
   if (hbd < 1) {
@@ -1547,7 +1547,6 @@ void homeaxis(const AxisEnum axis) {
     if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z && !CAN_HOME_E) return;
   #endif
 
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> Active axis ", axis, "");
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");
 
   const int axis_home_dir = (
@@ -1595,8 +1594,6 @@ void homeaxis(const AxisEnum axis) {
     ) * axis_home_dir
   );
 
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Slow move...");
-
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
   #endif
@@ -1612,7 +1609,7 @@ void homeaxis(const AxisEnum axis) {
   // If a second homing move is configured...
   if (bump) {
     // Move away from the endstop by the axis HOME_BUMP_MM
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Move Away:");
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Homing: Moveing away...");
     do_homing_move(axis, -bump
       #if HOMING_Z_WITH_PROBE
         , MMM_TO_MMS(axis == Z_AXIS ? Z_PROBE_SPEED_FAST : 0)
