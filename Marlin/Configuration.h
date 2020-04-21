@@ -1,4 +1,4 @@
-/**
+s/**
  * Marlin 3D Printer Firmware
  * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
@@ -718,7 +718,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 160, 160, 4030.23, 998 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 160, 160, 8060.46, 998 }
 
 /**
  * Default Max Feed Rate (mm/s)
