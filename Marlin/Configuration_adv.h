@@ -605,8 +605,8 @@
 #if ENABLED(E_HOMING)
   #define E_HOME_PIN
   #define E_HOME_DIR -1
-  #define HOMING_FEEDRATE_E 90 //Deg/s
-  #define E_HOME_BUMP_MM 20 //Deg
+  #define HOMING_FEEDRATE_E 120 //Deg/s
+  #define E_HOME_BUMP_MM 35 //Deg
   #define USE_EMIN_PLUG
   //#define USE_EMAX_PLUG
   #define E_MAX_ENDSTOP_INVERTING false
@@ -1366,7 +1366,7 @@
     // If using software SPI, specify pins for SCLK, MOSI, MISO
     //#define CLCD_USE_SOFT_SPI
     #if ENABLED(CLCD_USE_SOFT_SPI)
-      #define CLCD_SOFT_SPI_MOSI 11
+      #define CLCD_SOFT_SPI_MOSI 11f
       #define CLCD_SOFT_SPI_MISO 12
       #define CLCD_SOFT_SPI_SCLK 13
     #endif
